@@ -43,7 +43,7 @@ C=gcc
 	$(C) $(CFLAGS) -fPIC $(INCLUDE) -c $< -o $@
 
 $(APP_NAME): $(LVGL_LIB) $(OBJS) 
-	g++ $(CFLAGS) $(OBJS) -l:$(LVGL_LIB) $(LDFLAGS) -o $@
+	g++ $(CFLAGS) $(OBJS) -l:$(LVGL_LIB) $(LDFLAGS) -l pthread -o $@
 
 
 

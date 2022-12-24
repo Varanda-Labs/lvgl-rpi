@@ -10,6 +10,10 @@
 #include "lvgl.h"
 #include "lv_hal_disp.h"
 #include "log.h"
+#include <pthread.h>
+#include <unistd.h>
+
+pthread_t timer_thread_id = -1;
 
 #define LVGL_TICK_TIME 50 //  50 milli
 
@@ -40,10 +44,10 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 
 static void init_pointer(void)
 {
-    lv_indev_drv_init(&indev_drv);
-    indev_drv.type = LV_INDEV_TYPE_POINTER;
-    indev_drv.read_cb = (void (*)(struct _lv_indev_drv_t *, lv_indev_data_t * )) touchpad_read;
-    lv_indev_drv_register(&indev_drv);
+  lv_indev_drv_init(&indev_drv);
+  indev_drv.type = LV_INDEV_TYPE_POINTER;
+  indev_drv.read_cb = (void (*)(struct _lv_indev_drv_t *, lv_indev_data_t * )) touchpad_read;
+  lv_indev_drv_register(&indev_drv);
 }
 
 static void init_disp()
@@ -76,30 +80,24 @@ static void init_disp()
   lv_disp_drv_register(&disp_drv);
 }
 
-void main(int argc, char **argv)
-{
-  LOG("runNative from LOG");
-
-  lv_init();
-  init_disp();
-  init_pointer();
-}
-
 void lv_integr_update_pointer(int x, int y, int state)
 {
-    touchpad_x = x;
-    touchpad_y = y;
-    touchpad_state = (lv_indev_state_t) state;
+  touchpad_x = x;
+  touchpad_y = y;
+  touchpad_state = (lv_indev_state_t) state;
 }
 
-void lv_integr_timer(void) {
-      static int cnt = 0;
-      lv_tick_inc(LVGL_TICK_TIME);
-      if (cnt++ > 4) {
-        cnt = 0;
-        lv_task_handler();
-      }
-
+void * lv_integr_timer(void * arg) {
+  while(1) {
+    static int cnt = 0;
+    lv_tick_inc(LVGL_TICK_TIME);
+    if (cnt++ > 4) {
+      cnt = 0;
+      lv_task_handler();
+    }
+    usleep(1000 * LVGL_TICK_TIME);
+  }
+  return NULL;
 }
 
 static void disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p)
@@ -136,4 +134,25 @@ static void updateDisplay (const lv_area_t * area, lv_color_t * color_p, bool la
 #endif
 
 }
+
+int main(int argc, char **argv)
+{
+  LOG("runNative from LOG");
+
+  lv_init();
+  init_disp();
+  init_pointer();
+  int res;
+  if((res = pthread_create((pthread_t *) &timer_thread_id, NULL, lv_integr_timer, NULL)) == 0) {
+    pthread_join(timer_thread_id, NULL);
+  }
+  else {
+    LOG_E("Could not create timer thread\nlvgl_app terminated.\n");
+    return 1;
+  }
+
+  LOG("lvgl_app terminated\n");
+  return 0;
+}
+
 
