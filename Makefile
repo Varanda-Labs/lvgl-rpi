@@ -34,6 +34,7 @@ INCLUDEPATH = \
 	-I ext/lvgl/src/hal \
 
 CFLAGS += ${INCLUDEPATH}
+CFLAGS +=  -DUSE_APP_LOG
 
 LDFLAGS += -L . -L /ext
 

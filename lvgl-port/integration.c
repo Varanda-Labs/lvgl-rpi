@@ -22,7 +22,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <signal.h>
 //#include <cairo.h>
+
+extern void lvgl_app_main (void);
 
 #define RED         0b1111100000000000
 #define GREEN       0b0000011111100000
@@ -32,10 +35,11 @@
 
 static int fbfd = -1;
 static char *fbp = 0;
+static bool exit_flag = false;
 
 pthread_t timer_thread_id = -1;
 
-#define LVGL_TICK_TIME 50 //  50 milli
+#define LVGL_TICK_TIME 5 //  5 milli
 
 static void updateDisplay (const lv_area_t * area, lv_color_t * color_p, bool last);
 
@@ -94,6 +98,10 @@ static void fbwriter_close()
 
 static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
+#if 1
+  //LOG("touchpad_read\n");
+  return false;
+#else
   bool ret = false;
   data->point.x = touchpad_x;
   data->point.y = touchpad_y;
@@ -103,6 +111,7 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
       LOG("mouse down: x=%d y=%d", touchpad_x, touchpad_y);
   }
   return ret; /*No buffering now so no more data read*/
+#endif
 }
 
 static void init_pointer(void)
@@ -150,8 +159,9 @@ void lv_integr_update_pointer(int x, int y, int state)
   touchpad_state = (lv_indev_state_t) state;
 }
 
+// Must be called from main thread
 void * lv_integr_timer(void * arg) {
-  while(1) {
+  while( ! exit_flag) {
     static int cnt = 0;
     lv_tick_inc(LVGL_TICK_TIME);
     if (cnt++ > 4) {
@@ -195,16 +205,19 @@ static void updateDisplay (const lv_area_t * area, lv_color_t * color_p, bool la
         gMainObj->ui->lb_display->setPixmap(QPixmap::fromImage(gMainObj->display_image));
     }
 #endif
+    //LOG("x1 = %d, x2 = %d, y1 = %d, Y2 = %d\n", area->x1, area->x2, area->y1, area->y2);
     uint16_t * p = (uint16_t *) fbp;
     uint16_t pixel_output = 0;
     for(y = area->y1; y <= area->y2; y++) {
         for(x = area->x1; x <= area->x2; x++) {
             //uint16_t c = *color_p;
             //*(p + (x + y * 320)) = c; // (uint16_t) *color_p;
+            pixel = *color_p;
             pixel_output = pixel.ch.red << (16 + 3);
             pixel_output |= pixel.ch.green << (8 + 2);
             pixel_output |= pixel.ch.blue << 3;
-            *(p + (x + y * 320)) = pixel_output; // (uint16_t) *color_p;
+            *(p + (x + y * LV_HOR_RES_MAX)) = pixel_output; // (uint16_t) *color_p;
+            //if (pixel_output) LOG("Pixel = 0x%x\n", pixel_output);
 
             //gMainObj->display_image.setPixelColor(x,y, pixel_output);
             color_p++;
@@ -213,8 +226,22 @@ static void updateDisplay (const lv_area_t * area, lv_color_t * color_p, bool la
 
 }
 
+static void sigterm_handler(int s)
+{
+  exit_flag = true;
+}
+
 int main(int argc, char **argv)
 {
+	if (signal(SIGTERM, sigterm_handler) == SIG_ERR) // add signal to handle systemctl stop
+	{
+		LOG_W("fail to set signal SIGTERM\n");
+	}
+	if (signal(SIGINT, sigterm_handler) == SIG_ERR) // add signal to handle Control-C
+	{
+		LOG_W("fail to set signal SIGINT\n");
+	}
+
   LOG("runNative from LOG");
   if (fbwriter_open(FB_DEV_NAME)) {
     return 1;
@@ -223,7 +250,13 @@ int main(int argc, char **argv)
   init_disp();
   init_pointer();
   int res;
+
+#if 1
+  lvgl_app_main();
+  lv_integr_timer(NULL);
+#else
   if((res = pthread_create((pthread_t *) &timer_thread_id, NULL, lv_integr_timer, NULL)) == 0) {
+    lvgl_app_main ();
     pthread_join(timer_thread_id, NULL);
   }
   else {
@@ -231,6 +264,8 @@ int main(int argc, char **argv)
     LOG_E("Could not create timer thread\nlvgl_app terminated.\n");
     return 1;
   }
+#endif
+
   fbwriter_close();
   LOG("lvgl_app terminated\n");
   return 0;

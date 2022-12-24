@@ -20,7 +20,7 @@ static void event_handler(lv_event_t * e)
 void lvgl_app_main (void)
 {
     lv_obj_t * label;
-
+    LV_LOG_USER("Starting App...\n");
     lv_obj_t * btn1 = lv_btn_create(lv_scr_act());
     lv_obj_add_event_cb(btn1, event_handler, LV_EVENT_ALL, NULL);
     lv_obj_align(btn1, LV_ALIGN_CENTER, 0, -40);
