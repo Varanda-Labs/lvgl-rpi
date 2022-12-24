@@ -1,4 +1,9 @@
 
+#
+# MIT License: https://mit-license.org/
+#
+# Copyright © 2022 Varanda Labs Inc.
+#
 
 LIB_NAME := liblvgl.a
 
@@ -221,16 +226,10 @@ OBJS := ${SOURCES:.c=.o}
 
 CFLAGS += -g -O0 -DDEBUG -fmax-errors=3
 
-#program_INCLUDE_DIRS := 
-#program_LIBRARY_DIRS :=
-#program_LIBRARIES := mylib
-
 CFLAGS += -I lvgl-rpi/lvgl-port -I ../lvgl-port -I . 
 CFLAGS += ${INCLUDEPATH}
 
 LDFLAGS += -L . 
-
-#CC=cc
 
 C=gcc
 
@@ -240,13 +239,10 @@ C=gcc
 $(LIB_NAME): $(OBJS)
 	ar rcs $@ $(OBJS)
 
-#all: CFLAGS += -g -O0 -DDEBUG -fmax-errors=3
-
-#LINK.c := $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
-
 .PHONY: all
 
 all: $(LIB_NAME)
 
-#$(LIB_NAME): $(OBJS) 
-#    $(LINK.c) $(program_OBJS) -o $(LIB_NAME)
+clean:
+	rm -f $(LIB_NAME)
+	find . -type f -name '*.o' -delete
