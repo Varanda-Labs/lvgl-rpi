@@ -186,40 +186,12 @@ static void disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
 static void updateDisplay (const lv_area_t * area, lv_color_t * color_p, bool last)
 {
     int32_t x, y;
-    lv_color_t pixel;
-#if 0
-    QRgb pixel_output;
 
-    for(y = area->y1; y <= area->y2; y++) {
-        for(x = area->x1; x <= area->x2; x++) {
-            pixel = *color_p;
-            pixel_output = pixel.ch.red << (16 + 3);
-            pixel_output |= pixel.ch.green << (8 + 2);
-            pixel_output |= pixel.ch.blue << 3;
-
-            gMainObj->display_image.setPixelColor(x,y, pixel_output);
-            color_p++;
-        }
-    }
-    if (last) {
-        gMainObj->ui->lb_display->setPixmap(QPixmap::fromImage(gMainObj->display_image));
-    }
-#endif
-    //LOG("x1 = %d, x2 = %d, y1 = %d, Y2 = %d\n", area->x1, area->x2, area->y1, area->y2);
     uint16_t * p = (uint16_t *) fbp;
     uint16_t pixel_output = 0;
     for(y = area->y1; y <= area->y2; y++) {
         for(x = area->x1; x <= area->x2; x++) {
-            //uint16_t c = *color_p;
-            //*(p + (x + y * 320)) = c; // (uint16_t) *color_p;
-            pixel = *color_p;
-            pixel_output = pixel.ch.red << (16 + 3);
-            pixel_output |= pixel.ch.green << (8 + 2);
-            pixel_output |= pixel.ch.blue << 3;
-            *(p + (x + y * LV_HOR_RES_MAX)) = pixel_output; // (uint16_t) *color_p;
-            //if (pixel_output) LOG("Pixel = 0x%x\n", pixel_output);
-
-            //gMainObj->display_image.setPixelColor(x,y, pixel_output);
+            *(p + (x + y * LV_HOR_RES_MAX)) = (*color_p).full; 
             color_p++;
         }
     }
@@ -251,20 +223,8 @@ int main(int argc, char **argv)
   init_pointer();
   int res;
 
-#if 1
   lvgl_app_main();
   lv_integr_timer(NULL);
-#else
-  if((res = pthread_create((pthread_t *) &timer_thread_id, NULL, lv_integr_timer, NULL)) == 0) {
-    lvgl_app_main ();
-    pthread_join(timer_thread_id, NULL);
-  }
-  else {
-    fbwriter_close();
-    LOG_E("Could not create timer thread\nlvgl_app terminated.\n");
-    return 1;
-  }
-#endif
 
   fbwriter_close();
   LOG("lvgl_app terminated\n");
