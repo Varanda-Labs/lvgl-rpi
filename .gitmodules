@@ -1,0 +1,3 @@
+[submodule "ext/lvgl"]
+	path = ext/lvgl
+	url = https://github.com/Varanda-Labs/lvgl.git
