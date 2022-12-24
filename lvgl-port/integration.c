@@ -13,6 +13,26 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#include <stdio.h>
+#include <syslog.h>
+#include <sys/fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/fb.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
+//#include <cairo.h>
+
+#define RED         0b1111100000000000
+#define GREEN       0b0000011111100000
+#define BLUE        0b0000000000011111
+
+#define FB_DEV_NAME "/dev/fb1"
+
+static int fbfd = -1;
+static char *fbp = 0;
+
 pthread_t timer_thread_id = -1;
 
 #define LVGL_TICK_TIME 50 //  50 milli
@@ -28,6 +48,49 @@ static lv_indev_state_t touchpad_old_state = LV_INDEV_STATE_REL;
 
 static void disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p);
 static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
+
+static struct fb_var_screeninfo vinfo;
+static struct fb_fix_screeninfo finfo;
+
+static int fbwriter_open(char * dev_name) 
+{
+    fbfd = open(dev_name, O_RDWR);
+    if (fbfd == -1) {
+        LOG_E( "Unable to open secondary display\n");
+        return -1;
+    }
+    if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
+        LOG_E( "Unable to get secondary display information\n");
+        return -1;
+    }
+    if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
+        LOG_E( "Unable to get secondary display information\n");
+        return -1;
+    }
+
+    LOG("framebuffer display is %d x %d %dbps\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
+
+    fbp = (char*) mmap(0, finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
+    if (! fbp) {
+        LOG_E( "Unable to create memory mapping");
+        close(fbfd);
+        return -1;
+    }
+    return 0;
+}
+
+static int fbwriter_update(char * rgb565_ptr)
+{
+    memcpy(fbp, rgb565_ptr,  vinfo.xres * vinfo.yres * (vinfo.bits_per_pixel / 8));
+}
+
+static void fbwriter_close()
+{
+    LOG("loop done");
+    munmap(fbp, finfo.smem_len);
+    close(fbfd);
+}
+
 
 static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
@@ -132,13 +195,30 @@ static void updateDisplay (const lv_area_t * area, lv_color_t * color_p, bool la
         gMainObj->ui->lb_display->setPixmap(QPixmap::fromImage(gMainObj->display_image));
     }
 #endif
+    uint16_t * p = (uint16_t *) fbp;
+    uint16_t pixel_output = 0;
+    for(y = area->y1; y <= area->y2; y++) {
+        for(x = area->x1; x <= area->x2; x++) {
+            //uint16_t c = *color_p;
+            //*(p + (x + y * 320)) = c; // (uint16_t) *color_p;
+            pixel_output = pixel.ch.red << (16 + 3);
+            pixel_output |= pixel.ch.green << (8 + 2);
+            pixel_output |= pixel.ch.blue << 3;
+            *(p + (x + y * 320)) = pixel_output; // (uint16_t) *color_p;
+
+            //gMainObj->display_image.setPixelColor(x,y, pixel_output);
+            color_p++;
+        }
+    }
 
 }
 
 int main(int argc, char **argv)
 {
   LOG("runNative from LOG");
-
+  if (fbwriter_open(FB_DEV_NAME)) {
+    return 1;
+  }
   lv_init();
   init_disp();
   init_pointer();
@@ -147,10 +227,11 @@ int main(int argc, char **argv)
     pthread_join(timer_thread_id, NULL);
   }
   else {
+    fbwriter_close();
     LOG_E("Could not create timer thread\nlvgl_app terminated.\n");
     return 1;
   }
-
+  fbwriter_close();
   LOG("lvgl_app terminated\n");
   return 0;
 }
