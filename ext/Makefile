@@ -1,0 +1,252 @@
+
+
+LIB_NAME := liblvgl.a
+
+INCLUDEPATH += \
+  -I ./lvgl \
+  -I ./lvgl/src/core \
+  -I ./lvgl/src/core \
+  -I ./lvgl/src/draw \
+  -I ./lvgl/src/extra \
+  -I ./lvgl/src/font \
+  -I ./lvgl/src/gpu \
+  -I ./lvgl/src/hal \
+  -I ./lvgl/src/misc \
+  -I ./lvgl/src/widgets \
+  -I ./lvgl/demos/music \
+  -I ./lvgl/demos/music/assets
+
+
+SOURCES += \
+    lvgl/src/core/lv_disp.c \
+    lvgl/src/core/lv_event.c \
+    lvgl/src/core/lv_group.c \
+    lvgl/src/core/lv_indev.c \
+    lvgl/src/core/lv_indev_scroll.c \
+    lvgl/src/core/lv_obj.c \
+    lvgl/src/core/lv_obj_class.c \
+    lvgl/src/core/lv_obj_draw.c \
+    lvgl/src/core/lv_obj_pos.c \
+    lvgl/src/core/lv_obj_scroll.c \
+    lvgl/src/core/lv_obj_style.c \
+    lvgl/src/core/lv_obj_style_gen.c \
+    lvgl/src/core/lv_obj_tree.c \
+    lvgl/src/core/lv_refr.c \
+    lvgl/src/core/lv_theme.c \
+    lvgl/src/draw/lv_draw.c \
+    lvgl/src/draw/lv_draw_arc.c \
+    lvgl/src/draw/lv_draw_img.c \
+    lvgl/src/draw/lv_draw_label.c \
+    lvgl/src/draw/lv_draw_line.c \
+    lvgl/src/draw/lv_draw_mask.c \
+    lvgl/src/draw/lv_draw_rect.c \
+    lvgl/src/draw/lv_draw_triangle.c \
+    lvgl/src/draw/lv_img_buf.c \
+    lvgl/src/draw/lv_img_cache.c \
+    lvgl/src/draw/lv_img_decoder.c \
+    lvgl/src/draw/sw/lv_draw_sw.c \
+    lvgl/src/draw/sw/lv_draw_sw_arc.c \
+    lvgl/src/draw/sw/lv_draw_sw_blend.c \
+    lvgl/src/draw/sw/lv_draw_sw_dither.c \
+    lvgl/src/draw/sw/lv_draw_sw_gradient.c \
+    lvgl/src/draw/sw/lv_draw_sw_img.c \
+    lvgl/src/draw/sw/lv_draw_sw_letter.c \
+    lvgl/src/draw/sw/lv_draw_sw_line.c \
+    lvgl/src/draw/sw/lv_draw_sw_polygon.c \
+    lvgl/src/draw/sw/lv_draw_sw_rect.c \
+    lvgl/src/extra/layouts/flex/lv_flex.c \
+    lvgl/src/extra/layouts/grid/lv_grid.c \
+    lvgl/src/extra/lv_extra.c \
+    lvgl/src/extra/themes/basic/lv_theme_basic.c \
+    lvgl/src/extra/themes/default/lv_theme_default.c \
+    lvgl/src/extra/themes/mono/lv_theme_mono.c \
+    lvgl/src/font/lv_font.c \
+    lvgl/src/font/lv_font_dejavu_16_persian_hebrew.c \
+    lvgl/src/font/lv_font_fmt_txt.c \
+    lvgl/src/font/lv_font_loader.c \
+    lvgl/src/font/lv_font_montserrat_10.c \
+    lvgl/src/font/lv_font_montserrat_12.c \
+    lvgl/src/font/lv_font_montserrat_12_subpx.c \
+    lvgl/src/font/lv_font_montserrat_14.c \
+    lvgl/src/font/lv_font_montserrat_16.c \
+    lvgl/src/font/lv_font_montserrat_18.c \
+    lvgl/src/font/lv_font_montserrat_20.c \
+    lvgl/src/font/lv_font_montserrat_22.c \
+    lvgl/src/font/lv_font_montserrat_24.c \
+    lvgl/src/font/lv_font_montserrat_26.c \
+    lvgl/src/font/lv_font_montserrat_28.c \
+    lvgl/src/font/lv_font_montserrat_28_compressed.c \
+    lvgl/src/font/lv_font_montserrat_30.c \
+    lvgl/src/font/lv_font_montserrat_32.c \
+    lvgl/src/font/lv_font_montserrat_34.c \
+    lvgl/src/font/lv_font_montserrat_36.c \
+    lvgl/src/font/lv_font_montserrat_38.c \
+    lvgl/src/font/lv_font_montserrat_40.c \
+    lvgl/src/font/lv_font_montserrat_42.c \
+    lvgl/src/font/lv_font_montserrat_44.c \
+    lvgl/src/font/lv_font_montserrat_46.c \
+    lvgl/src/font/lv_font_montserrat_48.c \
+    lvgl/src/font/lv_font_montserrat_8.c \
+    lvgl/src/font/lv_font_simsun_16_cjk.c \
+    lvgl/src/font/lv_font_unscii_16.c \
+    lvgl/src/font/lv_font_unscii_8.c \
+    lvgl/src/hal/lv_hal_disp.c \
+    lvgl/src/hal/lv_hal_indev.c \
+    lvgl/src/hal/lv_hal_tick.c \
+    lvgl/src/misc/lv_anim.c \
+    lvgl/src/misc/lv_anim_timeline.c \
+    lvgl/src/misc/lv_area.c \
+    lvgl/src/misc/lv_async.c \
+    lvgl/src/misc/lv_bidi.c \
+    lvgl/src/misc/lv_color.c \
+    lvgl/src/misc/lv_fs.c \
+    lvgl/src/misc/lv_gc.c \
+    lvgl/src/misc/lv_ll.c \
+    lvgl/src/misc/lv_log.c \
+    lvgl/src/misc/lv_lru.c \
+    lvgl/src/misc/lv_math.c \
+    lvgl/src/misc/lv_mem.c \
+    lvgl/src/misc/lv_printf.c \
+    lvgl/src/misc/lv_style.c \
+    lvgl/src/misc/lv_style_gen.c \
+    lvgl/src/misc/lv_templ.c \
+    lvgl/src/misc/lv_timer.c \
+    lvgl/src/misc/lv_tlsf.c \
+    lvgl/src/misc/lv_txt.c \
+    lvgl/src/misc/lv_txt_ap.c \
+    lvgl/src/misc/lv_utils.c \
+    lvgl/src/widgets/lv_arc.c \
+    lvgl/src/widgets/lv_bar.c \
+    lvgl/src/widgets/lv_btn.c \
+    lvgl/src/widgets/lv_btnmatrix.c \
+    lvgl/src/widgets/lv_canvas.c \
+    lvgl/src/widgets/lv_checkbox.c \
+    lvgl/src/widgets/lv_dropdown.c \
+    lvgl/src/widgets/lv_img.c \
+    lvgl/src/widgets/lv_label.c \
+    lvgl/src/widgets/lv_line.c \
+    lvgl/src/widgets/lv_objx_templ.c \
+    lvgl/src/widgets/lv_roller.c \
+    lvgl/src/widgets/lv_slider.c \
+    lvgl/src/widgets/lv_switch.c \
+    lvgl/src/widgets/lv_table.c \
+    lvgl/src/widgets/lv_textarea.c \
+    lvgl/src/extra/widgets/calendar/lv_calendar_header_dropdown.c \
+    lvgl/src/extra/widgets/calendar/lv_calendar_header_arrow.c \
+    lvgl/src/extra/widgets/calendar/lv_calendar.c \
+    lvgl/src/extra/widgets/led/lv_led.c \
+    lvgl/src/extra/widgets/win/lv_win.c \
+    lvgl/src/extra/widgets/chart/lv_chart.c \
+    lvgl/src/extra/widgets/spinbox/lv_spinbox.c \
+    lvgl/src/extra/widgets/imgbtn/lv_imgbtn.c \
+    lvgl/src/extra/widgets/spinner/lv_spinner.c \
+    lvgl/src/extra/widgets/tabview/lv_tabview.c \
+    lvgl/src/extra/widgets/msgbox/lv_msgbox.c \
+    lvgl/src/extra/widgets/span/lv_span.c \
+    lvgl/src/extra/widgets/colorwheel/lv_colorwheel.c \
+    lvgl/src/extra/widgets/list/lv_list.c \
+    lvgl/src/extra/widgets/menu/lv_menu.c \
+    lvgl/src/extra/widgets/animimg/lv_animimg.c \
+    lvgl/src/extra/widgets/meter/lv_meter.c \
+    lvgl/src/extra/widgets/tileview/lv_tileview.c \
+    lvgl/src/extra/widgets/keyboard/lv_keyboard.c \
+    lvgl/src/extra/others/snapshot/lv_snapshot.c \
+    lvgl/src/extra/others/gridnav/lv_gridnav.c \
+    lvgl/src/extra/others/monkey/lv_monkey.c \
+    lvgl/src/extra/libs/ffmpeg/lv_ffmpeg.c \
+    lvgl/src/extra/libs/sjpg/tjpgd.c \
+    lvgl/src/extra/libs/sjpg/lv_sjpg.c \
+    lvgl/src/extra/libs/freetype/lv_freetype.c \
+    lvgl/src/extra/libs/png/lv_png.c \
+    lvgl/src/extra/libs/png/lodepng.c \
+    lvgl/src/extra/libs/qrcode/lv_qrcode.c \
+    lvgl/src/extra/libs/qrcode/qrcodegen.c \
+    lvgl/src/extra/libs/rlottie/lv_rlottie.c \
+    lvgl/src/extra/libs/fsdrv/lv_fs_stdio.c \
+    lvgl/src/extra/libs/fsdrv/lv_fs_posix.c \
+    lvgl/src/extra/libs/fsdrv/lv_fs_fatfs.c \
+    lvgl/src/extra/libs/fsdrv/lv_fs_win32.c \
+    lvgl/src/extra/libs/bmp/lv_bmp.c \
+    lvgl/src/extra/libs/gif/lv_gif.c \
+    lvgl/src/extra/libs/gif/gifdec.c \
+    lvgl/demos/music/lv_demo_music_list.c \
+    lvgl/demos/music/lv_demo_music_main.c \
+    lvgl/demos/music/assets/img_lv_demo_music_slider_knob_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_list_border_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_icon_1.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_list_play_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_next.c \
+    lvgl/demos/music/assets/img_lv_demo_music_cover_1.c \
+    lvgl/demos/music/assets/img_lv_demo_music_logo.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_corner_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_list_border.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_loop_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_prev_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_icon_4_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_next_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_wave_top.c \
+    lvgl/demos/music/assets/img_lv_demo_music_icon_2.c \
+    lvgl/demos/music/assets/img_lv_demo_music_corner_right_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_cover_2.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_list_play.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_play_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_pause_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_loop.c \
+    lvgl/demos/music/assets/img_lv_demo_music_corner_right.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_pause.c \
+    lvgl/demos/music/assets/img_lv_demo_music_cover_2_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_list_pause.c \
+    lvgl/demos/music/assets/img_lv_demo_music_icon_2_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_rnd_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_cover_3.c \
+    lvgl/demos/music/assets/img_lv_demo_music_icon_3.c \
+    lvgl/demos/music/assets/img_lv_demo_music_icon_3_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_rnd.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_list_pause_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_corner_left.c \
+    lvgl/demos/music/assets/img_lv_demo_music_cover_3_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_corner_left_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_prev.c \
+    lvgl/demos/music/assets/img_lv_demo_music_icon_1_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_icon_4.c \
+    lvgl/demos/music/assets/img_lv_demo_music_btn_play.c \
+    lvgl/demos/music/assets/img_lv_demo_music_cover_1_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_wave_bottom.c \
+    lvgl/demos/music/assets/img_lv_demo_music_wave_bottom_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_wave_top_large.c \
+    lvgl/demos/music/assets/img_lv_demo_music_slider_knob.c \
+    lvgl/demos/music/lv_demo_music.c
+
+OBJS := ${SOURCES:.c=.o}
+
+CFLAGS += -g -O0 -DDEBUG -fmax-errors=3
+
+#program_INCLUDE_DIRS := 
+#program_LIBRARY_DIRS :=
+#program_LIBRARIES := mylib
+
+CFLAGS += -I lvgl-rpi/lvgl-port -I ../lvgl-port -I . 
+CFLAGS += ${INCLUDEPATH}
+
+LDFLAGS += -L . 
+
+#CC=cc
+
+C=gcc
+
+%.o: %.c
+	$(C) $(CFLAGS) -fPIC $(INCLUDE) -c $< -o $@
+
+$(LIB_NAME): $(OBJS)
+	ar rcs $@ $(OBJS)
+
+#all: CFLAGS += -g -O0 -DDEBUG -fmax-errors=3
+
+#LINK.c := $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
+
+.PHONY: all
+
+all: $(LIB_NAME)
+
+#$(LIB_NAME): $(OBJS) 
+#    $(LINK.c) $(program_OBJS) -o $(LIB_NAME)
