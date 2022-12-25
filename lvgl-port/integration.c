@@ -41,11 +41,16 @@ extern void lvgl_app_main (void);
 static int fbfd = -1;
 static char *fbp = 0;
 static bool exit_flag = false;
-static int ternimate_fd = -1; // eventfd(0, EFD_NONBLOCK);
+
+#ifdef USE_EVENT_THREAD
+  static int ternimate_fd = -1; // eventfd(0, EFD_NONBLOCK);
+#else
+  static int event_fd = -1;
+#endif
 
 pthread_t event_moni_thread_id = -1;
 
-#define LVGL_TICK_TIME 5 //  5 milli
+#define LVGL_TICK_TIME 1 //  1 milli
 
 static void updateDisplay (const lv_area_t * area, lv_color_t * color_p, bool last);
 
@@ -100,6 +105,17 @@ static void fbwriter_close()
     munmap(fbp, finfo.smem_len);
     close(fbfd);
 }
+
+#define TYPE__EV_ABS              3
+#define CODE__ABS_X               0
+#define CODE__ABS_Y               1
+#define CODE__ABS_PRESSURE        24
+
+#define ABS_X__MIN_VALUE          0       // Left
+#define ABS_X__MAX_VALUE          4095
+#define ABS_Y__MIN_VALUE          0
+#define ABS_Y__MAX_VALUE          4095    // top
+
 
 /**
 struct input_event {
@@ -166,6 +182,8 @@ Event: time 1671994848.062729, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 0
 
 */
 
+#ifdef USE_EVENT_THREAD
+
 static inline const char* typename(unsigned int type)
 {
   return "TYPE ???";
@@ -177,6 +195,7 @@ static inline const char* codename(unsigned int type, unsigned int code)
     return "CODE ???";
 	//return (type <= EV_MAX && code <= maxval[type] && names[type] && names[type][code]) ? names[type][code] : "?";
 }
+
 
 static void * event_monitor_thread(void * par)
 {
@@ -265,12 +284,47 @@ static void * event_monitor_thread(void * par)
   close(ternimate_fd);
 
 }
+#endif
 
 static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
 #if 1
   //LOG("touchpad_read\n");
+  struct input_event ev;
+  int rd;
+  while(read(event_fd, &ev, sizeof(ev)) == sizeof(ev)) {
+    //rd = read(event_fd, &ev, sizeof(ev));
+    // if (rd != sizeof(ev)) {
+    //   return false;
+    // }
+
+    static int x = 0;
+    static int y = 0;
+    if (ev.type == TYPE__EV_ABS) {
+      switch(ev.code) {
+        case CODE__ABS_X:
+          x = (ev.value * LV_HOR_RES_MAX) / ABS_X__MAX_VALUE;
+          break;
+
+        case CODE__ABS_Y:
+          y = (ev.value * LV_VER_RES_MAX) / ABS_Y__MAX_VALUE;
+          break;
+
+        case CODE__ABS_PRESSURE:
+          if (ev.value > 0) {
+            LOG("(%d , %d)\n", x, y);
+            return true;
+          }
+          break;
+
+        default:
+          LOG("unexpected event code: %d\n", ev.code);
+          break;
+      }
+    }
+  }
   return false;
+
 #else
   bool ret = false;
   data->point.x = touchpad_x;
@@ -341,10 +395,12 @@ void * lv_integr_timer(void * arg) {
     usleep(1000 * LVGL_TICK_TIME);
   }
 
+#ifdef USE_EVENT_THREAD
   if (ternimate_fd != -1) {
     uint64_t v = 0x30;
     write(ternimate_fd, &v, sizeof(v));
   }
+#endif
 
   return NULL;
 }
@@ -396,18 +452,26 @@ int main(int argc, char **argv)
   init_pointer();
   int res;
 
+#ifdef USE_EVENT_THREAD
   if((res = pthread_create((pthread_t *) &event_moni_thread_id, NULL, event_monitor_thread, NULL))) {
     LOG_E("Could not create timer thread\nlvgl_app terminated.\n");
     fbwriter_close();
     return 1;
   }
+#else
+  event_fd = open(EVENT_DEV_NAME, O_RDONLY | O_NONBLOCK);
+#endif
 
   lvgl_app_main();
   lv_integr_timer(NULL);
 
   fbwriter_close();
   LOG("Wait event thread to terminate...\n");
+
+#ifdef USE_EVENT_THREAD
   pthread_join(event_moni_thread_id, NULL);
+#endif
+
   LOG("lvgl_app terminated\n");
   return 0;
 }
