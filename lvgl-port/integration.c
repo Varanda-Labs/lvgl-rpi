@@ -201,13 +201,12 @@ static void * event_monitor_thread(void * par)
   fds[0].fd = ternimate_fd;
   fds[1].fd = fd;
 
-  fds[0].events = POLLIN | POLLOUT;
+  fds[0].events = POLLIN;
   fds[1].events = POLLIN;
 
 
   while(1) {
     ret = poll(fds, 2, -1);
-    LOG("poll ret = %d\n", ret);
 
     if (ret <= 0) {
       LOG_E("poll fail\n");
@@ -217,7 +216,6 @@ static void * event_monitor_thread(void * par)
     }
 
     if (fds[0].revents & POLLIN) {
-      LOG("Breaking\n");
       break;
     }
 
@@ -344,9 +342,8 @@ void * lv_integr_timer(void * arg) {
   }
 
   if (ternimate_fd != -1) {
-    int v = 0x30;
+    uint64_t v = 0x30;
     write(ternimate_fd, &v, sizeof(v));
-    //LOG("Writing to ternimate_fd fd\n");
   }
 
   return NULL;
