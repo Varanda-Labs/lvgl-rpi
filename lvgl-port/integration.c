@@ -23,6 +23,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <signal.h>
+#include <linux/input.h>
+#include <sys/eventfd.h>
+#include <sys/poll.h>
+#include <errno.h>
 //#include <cairo.h>
 
 extern void lvgl_app_main (void);
@@ -32,12 +36,14 @@ extern void lvgl_app_main (void);
 #define BLUE        0b0000000000011111
 
 #define FB_DEV_NAME "/dev/fb1"
+#define EVENT_DEV_NAME "/dev/input/event2"
 
 static int fbfd = -1;
 static char *fbp = 0;
 static bool exit_flag = false;
+static int ternimate_fd = -1; // eventfd(0, EFD_NONBLOCK);
 
-pthread_t timer_thread_id = -1;
+pthread_t event_moni_thread_id = -1;
 
 #define LVGL_TICK_TIME 5 //  5 milli
 
@@ -95,6 +101,172 @@ static void fbwriter_close()
     close(fbfd);
 }
 
+/**
+struct input_event {
+	struct timeval time;
+	unsigned short type;
+	unsigned short code;
+	unsigned int value;
+};
+
+Input device name: "ADS7846 Touchscreen"
+Supported events:
+  Event type 0 (EV_SYN)
+  Event type 1 (EV_KEY)
+    Event code 330 (BTN_TOUCH)
+  Event type 3 (EV_ABS)
+    Event code 0 (ABS_X)
+      Value   3222
+      Min        0
+      Max     4095
+    Event code 1 (ABS_Y)
+      Value   1713
+      Min        0
+      Max     4095
+    Event code 24 (ABS_PRESSURE)
+      Value      0
+      Min        0
+      Max      255
+
+Top Left:
+Event: time 1671994700.406903, -------------- SYN_REPORT ------------
+Event: time 1671994700.418902, type 3 (EV_ABS), code 0 (ABS_X), value 337
+Event: time 1671994700.418902, type 3 (EV_ABS), code 1 (ABS_Y), value 3878
+Event: time 1671994700.418902, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 128
+Event: time 1671994700.418902, -------------- SYN_REPORT ------------
+Event: time 1671994700.430727, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 0
+Event: time 1671994700.430727, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 0
+
+Top Right:
+Event: time 1671994761.254899, -------------- SYN_REPORT ------------
+Event: time 1671994761.266915, type 3 (EV_ABS), code 0 (ABS_X), value 326
+Event: time 1671994761.266915, type 3 (EV_ABS), code 1 (ABS_Y), value 282
+Event: time 1671994761.266915, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 118
+Event: time 1671994761.266915, -------------- SYN_REPORT ------------
+Event: time 1671994761.278716, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 0
+Event: time 1671994761.278716, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 0
+
+Bottom Left:
+Event: time 1671994798.310904, -------------- SYN_REPORT ------------
+Event: time 1671994798.322893, type 3 (EV_ABS), code 0 (ABS_X), value 3787
+Event: time 1671994798.322893, type 3 (EV_ABS), code 1 (ABS_Y), value 3923
+Event: time 1671994798.322893, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 147
+Event: time 1671994798.322893, -------------- SYN_REPORT ------------
+Event: time 1671994798.334717, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 0
+Event: time 1671994798.334717, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 0
+
+Bottom Right:
+Event: time 1671994848.038901, -------------- SYN_REPORT ------------
+Event: time 1671994848.050911, type 3 (EV_ABS), code 0 (ABS_X), value 3769
+Event: time 1671994848.050911, type 3 (EV_ABS), code 1 (ABS_Y), value 280
+Event: time 1671994848.050911, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 144
+Event: time 1671994848.050911, -------------- SYN_REPORT ------------
+Event: time 1671994848.062729, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 0
+Event: time 1671994848.062729, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 0
+
+*/
+
+static inline const char* typename(unsigned int type)
+{
+  return "TYPE ???";
+	//return (type <= EV_MAX && events[type]) ? events[type] : "?";
+}
+
+static inline const char* codename(unsigned int type, unsigned int code)
+{
+    return "CODE ???";
+	//return (type <= EV_MAX && code <= maxval[type] && names[type] && names[type][code]) ? names[type][code] : "?";
+}
+
+static void * event_monitor_thread(void * par)
+{
+  struct input_event ev;
+  int	rd, ret;
+  struct pollfd fds[2];
+
+  int fd = open(EVENT_DEV_NAME, O_RDONLY);
+  if (!fd) {
+    LOG_E("Could not open event file\n");
+    return NULL;
+  }
+
+  ternimate_fd = eventfd(0, EFD_NONBLOCK);
+  if (ternimate_fd == -1 ) {
+    LOG_E("Could not initialize ternimate_fd, err: %s\n", strerror(errno));
+    close(fd);
+    return NULL;
+  }
+
+  memset(fds, 0, sizeof(fds));
+  fds[0].fd = ternimate_fd;
+  fds[1].fd = fd;
+
+  fds[0].events = POLLIN | POLLOUT;
+  fds[1].events = POLLIN;
+
+
+  while(1) {
+    ret = poll(fds, 2, -1);
+    LOG("poll ret = %d\n", ret);
+
+    if (ret <= 0) {
+      LOG_E("poll fail\n");
+      close(fd);
+      close(ternimate_fd);
+      return NULL;
+    }
+
+    if (fds[0].revents & POLLIN) {
+      LOG("Breaking\n");
+      break;
+    }
+
+    if (fds[1].revents & POLLIN == 0) {
+      LOG("Unexpected state...\n");
+      continue;
+    }
+
+    if (exit_flag) {
+      LOG("leaving\n");
+      break;
+    }
+
+	  rd = read(fd, &ev, sizeof(ev));
+
+		if (rd < (int) sizeof(struct input_event)) {
+			LOG_E("expected %d bytes, got %d\n", (int) sizeof(struct input_event), rd);
+			LOG_E("\nevtest: error reading, terminating event monitor thread");
+			return NULL;
+		}
+
+    LOG("Event: time %ld.%06ld, ", ev.input_event_sec, ev.input_event_usec);
+    int type = ev.type;
+    int code = ev.code;
+
+    if (type == EV_SYN) {
+      if (code == SYN_MT_REPORT)
+        LOG("++++++++++++++ %s ++++++++++++\n", codename(type, code));
+      else if (code == SYN_DROPPED)
+        LOG(">>>>>>>>>>>>>> %s <<<<<<<<<<<<\n", codename(type, code));
+      else
+        LOG("-------------- %s ------------\n", codename(type, code));
+    } else {
+      LOG("type %d (%s), code %d (%s), ",
+        type, typename(type),
+        code, codename(type, code));
+      if (type == EV_MSC && (code == MSC_RAW || code == MSC_SCAN))
+        LOG("value %02x\n", ev.value);
+      else
+        LOG("value %d\n", ev.value);
+    }
+
+  }
+
+  LOG("terminate event monitor thread.\n");
+  close(fd);
+  close(ternimate_fd);
+
+}
 
 static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
@@ -170,6 +342,13 @@ void * lv_integr_timer(void * arg) {
     }
     usleep(1000 * LVGL_TICK_TIME);
   }
+
+  if (ternimate_fd != -1) {
+    int v = 0x30;
+    write(ternimate_fd, &v, sizeof(v));
+    //LOG("Writing to ternimate_fd fd\n");
+  }
+
   return NULL;
 }
 
@@ -179,9 +358,6 @@ static void disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t 
   updateDisplay(area, color_p, last);
   lv_disp_flush_ready(disp);         /* Indicate you are ready with the flushing*/
 }
-
-
-//----------- C++ functions ---------
 
 static void updateDisplay (const lv_area_t * area, lv_color_t * color_p, bool last)
 {
@@ -223,10 +399,18 @@ int main(int argc, char **argv)
   init_pointer();
   int res;
 
+  if((res = pthread_create((pthread_t *) &event_moni_thread_id, NULL, event_monitor_thread, NULL))) {
+    LOG_E("Could not create timer thread\nlvgl_app terminated.\n");
+    fbwriter_close();
+    return 1;
+  }
+
   lvgl_app_main();
   lv_integr_timer(NULL);
 
   fbwriter_close();
+  LOG("Wait event thread to terminate...\n");
+  pthread_join(event_moni_thread_id, NULL);
   LOG("lvgl_app terminated\n");
   return 0;
 }
