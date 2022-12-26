@@ -107,8 +107,8 @@ static void fbwriter_close()
 }
 
 #define TYPE__EV_ABS              3
-#define CODE__ABS_X               0
-#define CODE__ABS_Y               1
+#define CODE__ABS_X               1
+#define CODE__ABS_Y               0
 #define CODE__ABS_PRESSURE        24
 
 #define ABS_X__MIN_VALUE          0       // Left
@@ -304,6 +304,7 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
       switch(ev.code) {
         case CODE__ABS_X:
           x = (ev.value * LV_HOR_RES_MAX) / ABS_X__MAX_VALUE;
+          x = LV_HOR_RES_MAX - x;
           break;
 
         case CODE__ABS_Y:
@@ -313,8 +314,12 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
         case CODE__ABS_PRESSURE:
           if (ev.value > 0) {
             LOG("(%d , %d)\n", x, y);
+            data->point.x = x;
+            data->point.y = y;
+            data->state = LV_INDEV_STATE_PR;
             return true;
           }
+          data->state = LV_INDEV_STATE_REL;
           break;
 
         default:
@@ -388,6 +393,7 @@ void * lv_integr_timer(void * arg) {
   while( ! exit_flag) {
     static int cnt = 0;
     lv_tick_inc(LVGL_TICK_TIME);
+
     if (cnt++ > 4) {
       cnt = 0;
       lv_task_handler();
