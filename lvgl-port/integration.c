@@ -30,6 +30,7 @@
 //#include <cairo.h>
 
 extern void lvgl_app_main (void);
+extern void ui_init(void);
 
 #define RED         0b1111100000000000
 #define GREEN       0b0000011111100000
@@ -72,6 +73,8 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
 
 static struct fb_var_screeninfo vinfo;
 static struct fb_fix_screeninfo finfo;
+
+lv_indev_t * global_indev; // Global
 
 static int fbwriter_open(char * dev_name) 
 {
@@ -324,8 +327,11 @@ int main(int argc, char **argv)
   int res;
 
   event_fd = open(EVENT_DEV_NAME, O_RDONLY | O_NONBLOCK);
-
+#if 0
   lvgl_app_main();
+#else
+  ui_init();
+#endif
   lv_integr_timer(NULL);
 
   close(event_fd);
