@@ -49,16 +49,20 @@ SOURCES += \
     lvgl/src/draw/lv_img_buf.c \
     lvgl/src/draw/lv_img_cache.c \
     lvgl/src/draw/lv_img_decoder.c \
-    lvgl/src/draw/sw/lv_draw_sw.c \
     lvgl/src/draw/sw/lv_draw_sw_arc.c \
     lvgl/src/draw/sw/lv_draw_sw_blend.c \
+    lvgl/src/draw/sw/lv_draw_sw.c \
     lvgl/src/draw/sw/lv_draw_sw_dither.c \
     lvgl/src/draw/sw/lv_draw_sw_gradient.c \
     lvgl/src/draw/sw/lv_draw_sw_img.c \
+    lvgl/src/draw/sw/lv_draw_sw_layer.c \
     lvgl/src/draw/sw/lv_draw_sw_letter.c \
     lvgl/src/draw/sw/lv_draw_sw_line.c \
     lvgl/src/draw/sw/lv_draw_sw_polygon.c \
     lvgl/src/draw/sw/lv_draw_sw_rect.c \
+    lvgl/src/draw/sw/lv_draw_sw_transform.c \
+    lvgl/src/draw/lv_draw_layer.c \
+    lvgl/src/draw/lv_draw_transform.c \
     lvgl/src/extra/layouts/flex/lv_flex.c \
     lvgl/src/extra/layouts/grid/lv_grid.c \
     lvgl/src/extra/lv_extra.c \
