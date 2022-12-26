@@ -38,15 +38,21 @@ extern void lvgl_app_main (void);
 #define FB_DEV_NAME "/dev/fb1"
 #define EVENT_DEV_NAME "/dev/input/event2"
 
+#define TYPE__EV_ABS              3
+#define CODE__ABS_X               1
+#define CODE__ABS_Y               0
+#define CODE__ABS_PRESSURE        24
+
+#define ABS_X__MIN_VALUE          0       // Left
+#define ABS_X__MAX_VALUE          4095
+#define ABS_Y__MIN_VALUE          0
+#define ABS_Y__MAX_VALUE          4095    // top
+
 static int fbfd = -1;
 static char *fbp = 0;
 static bool exit_flag = false;
+static int event_fd = -1;
 
-#ifdef USE_EVENT_THREAD
-  static int ternimate_fd = -1; // eventfd(0, EFD_NONBLOCK);
-#else
-  static int event_fd = -1;
-#endif
 
 pthread_t event_moni_thread_id = -1;
 
@@ -106,24 +112,12 @@ static void fbwriter_close()
     close(fbfd);
 }
 
-#define TYPE__EV_ABS              3
-#define CODE__ABS_X               1
-#define CODE__ABS_Y               0
-#define CODE__ABS_PRESSURE        24
-
-#define ABS_X__MIN_VALUE          0       // Left
-#define ABS_X__MAX_VALUE          4095
-#define ABS_Y__MIN_VALUE          0
-#define ABS_Y__MAX_VALUE          4095    // top
-
-
-/**
-struct input_event {
-	struct timeval time;
-	unsigned short type;
-	unsigned short code;
-	unsigned int value;
-};
+/*
+ refs:
+     https://learn.watterott.com/hats/rpi-display/fbtft-install/
+     events: https://www.kernel.org/doc/html/v4.15/input/input.html
+             see with either "cat /dev/input/event2 |xxd" or evtest
+             code: https://github.com/Robin329/evtest/blob/master/evtest.c
 
 Input device name: "ADS7846 Touchscreen"
 Supported events:
@@ -182,122 +176,12 @@ Event: time 1671994848.062729, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 0
 
 */
 
-#ifdef USE_EVENT_THREAD
-
-static inline const char* typename(unsigned int type)
-{
-  return "TYPE ???";
-	//return (type <= EV_MAX && events[type]) ? events[type] : "?";
-}
-
-static inline const char* codename(unsigned int type, unsigned int code)
-{
-    return "CODE ???";
-	//return (type <= EV_MAX && code <= maxval[type] && names[type] && names[type][code]) ? names[type][code] : "?";
-}
-
-
-static void * event_monitor_thread(void * par)
-{
-  struct input_event ev;
-  int	rd, ret;
-  struct pollfd fds[2];
-
-  int fd = open(EVENT_DEV_NAME, O_RDONLY);
-  if (!fd) {
-    LOG_E("Could not open event file\n");
-    return NULL;
-  }
-
-  ternimate_fd = eventfd(0, EFD_NONBLOCK);
-  if (ternimate_fd == -1 ) {
-    LOG_E("Could not initialize ternimate_fd, err: %s\n", strerror(errno));
-    close(fd);
-    return NULL;
-  }
-
-  memset(fds, 0, sizeof(fds));
-  fds[0].fd = ternimate_fd;
-  fds[1].fd = fd;
-
-  fds[0].events = POLLIN;
-  fds[1].events = POLLIN;
-
-
-  while(1) {
-    ret = poll(fds, 2, -1);
-
-    if (ret <= 0) {
-      LOG_E("poll fail\n");
-      close(fd);
-      close(ternimate_fd);
-      return NULL;
-    }
-
-    if (fds[0].revents & POLLIN) {
-      break;
-    }
-
-    if (fds[1].revents & POLLIN == 0) {
-      LOG("Unexpected state...\n");
-      continue;
-    }
-
-    if (exit_flag) {
-      LOG("leaving\n");
-      break;
-    }
-
-	  rd = read(fd, &ev, sizeof(ev));
-
-		if (rd < (int) sizeof(struct input_event)) {
-			LOG_E("expected %d bytes, got %d\n", (int) sizeof(struct input_event), rd);
-			LOG_E("\nevtest: error reading, terminating event monitor thread");
-			return NULL;
-		}
-
-    LOG("Event: time %ld.%06ld, ", ev.input_event_sec, ev.input_event_usec);
-    int type = ev.type;
-    int code = ev.code;
-
-    if (type == EV_SYN) {
-      if (code == SYN_MT_REPORT)
-        LOG("++++++++++++++ %s ++++++++++++\n", codename(type, code));
-      else if (code == SYN_DROPPED)
-        LOG(">>>>>>>>>>>>>> %s <<<<<<<<<<<<\n", codename(type, code));
-      else
-        LOG("-------------- %s ------------\n", codename(type, code));
-    } else {
-      LOG("type %d (%s), code %d (%s), ",
-        type, typename(type),
-        code, codename(type, code));
-      if (type == EV_MSC && (code == MSC_RAW || code == MSC_SCAN))
-        LOG("value %02x\n", ev.value);
-      else
-        LOG("value %d\n", ev.value);
-    }
-
-  }
-
-  LOG("terminate event monitor thread.\n");
-  close(fd);
-  close(ternimate_fd);
-
-}
-#endif
-
 static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
-#if 1
-  //LOG("touchpad_read\n");
   struct input_event ev;
   int rd;
-  while(read(event_fd, &ev, sizeof(ev)) == sizeof(ev)) {
-    //rd = read(event_fd, &ev, sizeof(ev));
-    // if (rd != sizeof(ev)) {
-    //   return false;
-    // }
 
+  while(read(event_fd, &ev, sizeof(ev)) == sizeof(ev)) {
     static int x = 0;
     static int y = 0;
     if (ev.type == TYPE__EV_ABS) {
@@ -313,7 +197,7 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 
         case CODE__ABS_PRESSURE:
           if (ev.value > 0) {
-            LOG("(%d , %d)\n", x, y);
+            //LOG("(%d , %d)\n", x, y);
             data->point.x = x;
             data->point.y = y;
             data->state = LV_INDEV_STATE_PR;
@@ -329,18 +213,6 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
     }
   }
   return false;
-
-#else
-  bool ret = false;
-  data->point.x = touchpad_x;
-  data->point.y = touchpad_y;
-  data->state = touchpad_state; //LV_INDEV_STATE_REL; //LV_INDEV_STATE_PR or LV_INDEV_STATE_REL;
-  if ( touchpad_state != touchpad_old_state) {
-      touchpad_old_state = touchpad_state;
-      LOG("mouse down: x=%d y=%d", touchpad_x, touchpad_y);
-  }
-  return ret; /*No buffering now so no more data read*/
-#endif
 }
 
 static void init_pointer(void)
@@ -401,13 +273,6 @@ void * lv_integr_timer(void * arg) {
     usleep(1000 * LVGL_TICK_TIME);
   }
 
-#ifdef USE_EVENT_THREAD
-  if (ternimate_fd != -1) {
-    uint64_t v = 0x30;
-    write(ternimate_fd, &v, sizeof(v));
-  }
-#endif
-
   return NULL;
 }
 
@@ -458,25 +323,13 @@ int main(int argc, char **argv)
   init_pointer();
   int res;
 
-#ifdef USE_EVENT_THREAD
-  if((res = pthread_create((pthread_t *) &event_moni_thread_id, NULL, event_monitor_thread, NULL))) {
-    LOG_E("Could not create timer thread\nlvgl_app terminated.\n");
-    fbwriter_close();
-    return 1;
-  }
-#else
   event_fd = open(EVENT_DEV_NAME, O_RDONLY | O_NONBLOCK);
-#endif
 
   lvgl_app_main();
   lv_integr_timer(NULL);
 
+  close(event_fd);
   fbwriter_close();
-  LOG("Wait event thread to terminate...\n");
-
-#ifdef USE_EVENT_THREAD
-  pthread_join(event_moni_thread_id, NULL);
-#endif
 
   LOG("lvgl_app terminated\n");
   return 0;
