@@ -1,7 +1,7 @@
 # LVGL for Raspberry PI
 LVGL port for Raspberry PI tested with 3B+ and LCD MHS35.
 <br>
-This project intends to embedded standalone without HDMI Monitor/Keyboard/mouse. For development you can use those but LCD runs independent.
+This project intends to be embedded and run standalone without HDMI Monitor/Keyboard/mouse. For development you can use those but LCD runs independent.
 <br>
 Note that most projects mirror HDMI to LCD so the drivers scripts (LCD-show repo) usually builds a frame-buffer copy application. In this project we do not want this and so we comment out the LCD-show in our recommended script (MHS35-varanda-show). We also suggest to prevent touch events to be dispatched to the HDMI screen in order to be 100% independent.
 
@@ -19,7 +19,9 @@ git checkout varanda
 chmod +x MHS35-varanda-show
 sudo ./MHS35-varanda-show
 ```
+
 ## disable touch events to be posted to HDMI screen
+
 To disable Touch for HDMI you can add to .bashrc:
 ```
    DISPLAY=:0 xinput disable 6
@@ -32,8 +34,9 @@ To disable Touch for HDMI you can add to .bashrc:
 
 Clone this repo and "make" it:
 ```
-git clone 
+git clone https://github.com/Varanda-Labs/lvgl-rpi.git
 cd lvgl-rpi
+git submodule update --init
 make
 ./lvgl_app
 ```
