@@ -10,7 +10,7 @@ Note that most projects mirror HDMI to LCD so the drivers scripts (LCD-show repo
 
 ![image](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https:%2F%2Fblog.kakaocdn.net%2Fdn%2FV1AUD%2Fbtqu2UweHaL%2Fvz6CPkfAUHlqujNkOkY6O0%2Fimg.jpg) -->
 
-<img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https:%2F%2Fblog.kakaocdn.net%2Fdn%2FV1AUD%2Fbtqu2UweHaL%2Fvz6CPkfAUHlqujNkOkY6O0%2Fimg.jpg" alt="drawing" width="400"/>
+<img src="docs/rpi-case.jpg" alt="drawing" width="400"/>
 
 # Rasbian
 All steps in the following instructions should be performed in the Raspberry running [Rasbiian](https://www.raspberrypi.com/software/).<br>
