@@ -77,6 +77,7 @@ SOURCES = \
 OBJS := ${SOURCES:.c=.o}
 
 CFLAGS += -g -O0 -DDEBUG -fmax-errors=3
+CFLAGS += -DMUSIC_DEMO
 
 INCLUDEPATH = \
  	-I . \

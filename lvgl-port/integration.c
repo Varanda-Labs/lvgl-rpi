@@ -340,12 +340,15 @@ int main(int argc, char **argv)
   int res;
 
   event_fd = open(EVENT_DEV_NAME, O_RDONLY | O_NONBLOCK);
-#ifndef GUITAR_PEDAL
+
+#if defined(GUITAR_PEDAL)
+  lvgl_app_main();
+#elif defined(MUSIC_DEMO)
   lv_demo_music();
-  //lvgl_app_main();
 #else
   ui_init();
 #endif
+
   lv_integr_timer(NULL);
 
   close(event_fd);
