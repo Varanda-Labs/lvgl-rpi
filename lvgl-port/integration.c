@@ -332,7 +332,7 @@ int main(int argc, char **argv)
   int res;
 
   event_fd = open(EVENT_DEV_NAME, O_RDONLY | O_NONBLOCK);
-#if 0
+#ifndef GUITAR_PEDAL
   lvgl_app_main();
 #else
   ui_init();
