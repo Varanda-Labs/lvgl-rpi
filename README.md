@@ -12,6 +12,9 @@ Note that most projects mirror HDMI to LCD so the drivers scripts (LCD-show repo
 
 <img src="docs/rpi-case.jpg" alt="drawing" width="400"/>
 
+## Video Demo
+To watch the video demo click on [this link](https://rumble.com/v246pqq-lvgl-on-raspberry-pi.html)
+
 # Rasbian
 All steps in the following instructions should be performed in the Raspberry running [Rasbiian](https://www.raspberrypi.com/software/).<br>
 There may be need to install some packages (ex: build-essential, git, etc)
