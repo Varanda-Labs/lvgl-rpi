@@ -29,9 +29,8 @@
 #include <errno.h>
 //#include <cairo.h>
 
-void lv_demo_music(void);
-
 extern void lvgl_app_main (void);
+extern void lv_demo_music(void);
 extern void ui_init(void);
 
 #define RED         0b1111100000000000
@@ -67,7 +66,6 @@ static void updateDisplay (const lv_area_t * area, lv_color_t * color_p, bool la
 
 #define DISP_BUF_SIZE (LV_HOR_RES_MAX * 10)
 
-static lv_indev_drv_t indev_drv;
 static int touchpad_x = 0, touchpad_y = 0;
 static lv_indev_state_t touchpad_state = LV_INDEV_STATE_REL;
 static lv_indev_state_t touchpad_old_state = LV_INDEV_STATE_REL;
@@ -78,7 +76,8 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data);
 static struct fb_var_screeninfo vinfo;
 static struct fb_fix_screeninfo finfo;
 
-lv_indev_t * global_indev; // Global
+static lv_indev_drv_t indev_drv;
+lv_indev_t * global_indev;
 
 static int fbwriter_open(char * dev_name) 
 {
@@ -187,10 +186,11 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 {
   struct input_event ev;
   int rd;
+  static int x = 0;
+  static int y = 0;
 
   while(read(event_fd, &ev, sizeof(ev)) == sizeof(ev)) {
-    static int x = 0;
-    static int y = 0;
+
     if (ev.type == TYPE__EV_ABS) {
       switch(ev.code) {
         case CODE__ABS_X:
@@ -204,12 +204,8 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
 
         case CODE__ABS_PRESSURE:
           if (ev.value > 0) {
-            //LOG("(%d , %d)\n", x, y);
-            data->point.x = x;
-            data->point.y = y;
-            data->state = LV_INDEV_STATE_PR;
             touch_in_progress = true;
-            return true;
+            break;
           }
           data->state = LV_INDEV_STATE_REL;
           touch_in_progress = false;
@@ -221,15 +217,25 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
       }
     }
   }
+  data->point.x = x;
+  data->point.y = y;
+  if (touch_in_progress) {
+    data->state = LV_INDEV_STATE_PR;
+    //LOG("(%d , %d)\n", x, y);
+  }
+  else {
+    data->state = LV_INDEV_STATE_REL;
+  }
+  
   return false;
 }
 
 static void init_pointer(void)
 {
-  lv_indev_drv_init(&indev_drv);
-  indev_drv.type = LV_INDEV_TYPE_POINTER;
-  indev_drv.read_cb = (void (*)(struct _lv_indev_drv_t *, lv_indev_data_t * )) touchpad_read;
-  lv_indev_drv_register(&indev_drv);
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.type = LV_INDEV_TYPE_POINTER;
+    indev_drv.read_cb = (void (*)(struct _lv_indev_drv_t *, lv_indev_data_t * )) touchpad_read;
+    global_indev = lv_indev_drv_register(&indev_drv);
 }
 
 static void init_disp()
@@ -336,8 +342,9 @@ int main(int argc, char **argv)
   event_fd = open(EVENT_DEV_NAME, O_RDONLY | O_NONBLOCK);
 #ifndef GUITAR_PEDAL
   lv_demo_music();
+  //lvgl_app_main();
 #else
-  lvgl_app_main();
+  ui_init();
 #endif
   lv_integr_timer(NULL);
 
