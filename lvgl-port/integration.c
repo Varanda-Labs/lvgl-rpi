@@ -54,6 +54,8 @@ static char *fbp = 0;
 static bool exit_flag = false;
 static int event_fd = -1;
 
+static volatile bool touch_in_progress = false;
+
 
 pthread_t event_moni_thread_id = -1;
 
@@ -204,9 +206,11 @@ static bool touchpad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
             data->point.x = x;
             data->point.y = y;
             data->state = LV_INDEV_STATE_PR;
+            touch_in_progress = true;
             return true;
           }
           data->state = LV_INDEV_STATE_REL;
+          touch_in_progress = false;
           break;
 
         default:
@@ -273,7 +277,8 @@ void * lv_integr_timer(void * arg) {
       cnt = 0;
       lv_task_handler();
     }
-    usleep(1000 * LVGL_TICK_TIME);
+    if ( ! touch_in_progress)
+      usleep(1000 * LVGL_TICK_TIME);
   }
 
   return NULL;

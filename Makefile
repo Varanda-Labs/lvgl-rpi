@@ -23,6 +23,7 @@ $(LVGL_LIB):
 
 SOURCES = \
 	lvgl-port/integration.c \
+	lvgl-port/log.c \
 	app/GuitarPedals/src/ui_img_number_9_png.c \
 	app/GuitarPedals/src/logo_images/ui_img_0021_png.c \
 	app/GuitarPedals/src/logo_images/logo_screen.c \
@@ -124,6 +125,10 @@ C=gcc
 
 $(APP_NAME): $(LVGL_LIB) $(OBJS) 
 	g++ $(CFLAGS) $(OBJS) -l:$(LVGL_LIB) $(LDFLAGS) -l pthread -o $@
+
+clean:
+	make -C ext clean
+	find . -type f -name '*.o' -delete
 
 
 
