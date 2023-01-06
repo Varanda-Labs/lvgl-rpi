@@ -231,7 +231,7 @@ OBJS := ${SOURCES:.c=.o}
 CFLAGS += -g -O0 -DDEBUG -fmax-errors=3
 
 CFLAGS += -I lvgl-rpi/lvgl-port -I ../lvgl-port -I . 
-CFLAGS += ${INCLUDEPATH}
+CFLAGS += ${INCLUDEPATH} -DLV_CONF_INCLUDE_SIMPLE
 
 LDFLAGS += -L . 
 
