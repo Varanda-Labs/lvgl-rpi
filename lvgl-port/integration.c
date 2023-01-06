@@ -29,6 +29,8 @@
 #include <errno.h>
 //#include <cairo.h>
 
+void lv_demo_music(void);
+
 extern void lvgl_app_main (void);
 extern void ui_init(void);
 
@@ -333,9 +335,9 @@ int main(int argc, char **argv)
 
   event_fd = open(EVENT_DEV_NAME, O_RDONLY | O_NONBLOCK);
 #ifndef GUITAR_PEDAL
-  lvgl_app_main();
+  lv_demo_music();
 #else
-  ui_init();
+  lvgl_app_main();
 #endif
   lv_integr_timer(NULL);
 

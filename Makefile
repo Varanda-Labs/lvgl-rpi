@@ -24,7 +24,54 @@ $(LVGL_LIB):
 SOURCES = \
 	lvgl-port/integration.c \
 	lvgl-port/log.c \
-	app/app.c \
+	ext/lvgl/demos/music/lv_demo_music.c \
+	ext/lvgl/demos/music/lv_demo_music_list.c \
+	ext/lvgl/demos/music/lv_demo_music_main.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_corner_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_list_pause.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_list_pause_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_list_play.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_list_play_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_loop.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_loop_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_next.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_next_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_pause.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_pause_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_play.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_play_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_prev.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_prev_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_rnd.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_btn_rnd_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_corner_left.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_corner_left_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_corner_right.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_corner_right_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_cover_1.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_cover_1_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_cover_2.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_cover_2_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_cover_3.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_cover_3_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_icon_1.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_icon_1_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_icon_2.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_icon_2_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_icon_3.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_icon_3_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_icon_4.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_icon_4_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_list_border.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_list_border_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_logo.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_slider_knob.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_slider_knob_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_wave_bottom.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_wave_bottom_large.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_wave_top.c \
+	ext/lvgl/demos/music/assets/img_lv_demo_music_wave_top_large.c \
+
 
 
 OBJS := ${SOURCES:.c=.o}
@@ -38,6 +85,9 @@ INCLUDEPATH = \
  	-I ext/lvgl \
 	-I ext/lvgl/src/hal \
 	-I ext/lvgl/src/misc \
+	-I ext/lvgl/demos \
+	-I ext/lvgl/demos/music \
+	-I ext/lvgl/demos/music/assets \
 
 CFLAGS += ${INCLUDEPATH}
 CFLAGS +=  -DUSE_APP_LOG

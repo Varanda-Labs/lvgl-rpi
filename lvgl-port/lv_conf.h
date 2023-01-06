@@ -688,7 +688,7 @@
 
 /*Music player demo*/
 // LV_USE_DEMO_MUSIC is defined in Qt if it is the case project
-// #define LV_USE_DEMO_MUSIC       0
+#define LV_USE_DEMO_MUSIC       1
 
 #if LV_USE_DEMO_MUSIC
 # define LV_DEMO_MUSIC_SQUARE       0
