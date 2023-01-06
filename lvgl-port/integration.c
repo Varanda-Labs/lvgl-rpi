@@ -341,12 +341,10 @@ int main(int argc, char **argv)
 
   event_fd = open(EVENT_DEV_NAME, O_RDONLY | O_NONBLOCK);
 
-#if defined(GUITAR_PEDAL)
-  lvgl_app_main();
-#elif defined(MUSIC_DEMO)
+#if defined(MUSIC_DEMO)
   lv_demo_music();
 #else
-  ui_init();
+  lvgl_app_main();
 #endif
 
   lv_integr_timer(NULL);
