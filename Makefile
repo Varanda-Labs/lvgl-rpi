@@ -102,6 +102,7 @@ SOURCES = \
 OBJS := ${SOURCES:.c=.o}
 
 CFLAGS += -g -O0 -DDEBUG -fmax-errors=3
+CFLAGS += -DGUITAR_PEDALS
 
 INCLUDEPATH = \
  	-I . \
