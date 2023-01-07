@@ -341,7 +341,9 @@ int main(int argc, char **argv)
 
   event_fd = open(EVENT_DEV_NAME, O_RDONLY | O_NONBLOCK);
 
-#if defined(MUSIC_DEMO)
+#if defined(GUITAR_PEDALS)
+  ui_init();
+#elif defined(MUSIC_DEMO)
   lv_demo_music();
 #else
   lvgl_app_main();
