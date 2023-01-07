@@ -285,8 +285,8 @@ void * lv_integr_timer(void * arg) {
       cnt = 0;
       lv_task_handler();
     }
-    if ( ! touch_in_progress)
-      usleep(1000 * LVGL_TICK_TIME);
+    // if ( ! touch_in_progress)
+    usleep(1000 * LVGL_TICK_TIME);
   }
 
   return NULL;
