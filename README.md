@@ -1,5 +1,5 @@
 # LVGL for Raspberry PI
-LVGL port for Raspberry PI tested with 3B+ and LCD MHS35.
+LVGL port for Raspberry PI tested with 3B+ and LCD [MHS35](http://www.lcdwiki.com/MHS-3.5inch_RPi_Display).
 <br>
 This project intends to be embedded and run standalone without HDMI Monitor/Keyboard/mouse. For development you can use those but LCD runs independent.
 <br>
