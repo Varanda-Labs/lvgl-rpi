@@ -37,8 +37,13 @@ extern void ui_init(void);
 #define GREEN       0b0000011111100000
 #define BLUE        0b0000000000011111
 
+#ifdef RPI4
+#define FB_DEV_NAME "/dev/fb2"
+#define EVENT_DEV_NAME "/dev/input/event0"
+#else
 #define FB_DEV_NAME "/dev/fb1"
 #define EVENT_DEV_NAME "/dev/input/event2"
+#endif
 
 #define TYPE__EV_ABS              3
 #define CODE__ABS_X               1
