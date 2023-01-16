@@ -48,6 +48,18 @@ make
 ```
 To exit the app you can "Control-C"
 
+# RPI 4
+I started testing with RPI-4.
+For now I have created a makefile just for the branch lvgl-music-demo. To build it:
+```
+make -f rpi4.mk
+```
+Need more test.
+<br>
+info  about drivers: https://github.com/notro/fbtft/wiki/Device-Tree
+
+
+
 
 
 
